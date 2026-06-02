@@ -129,7 +129,7 @@ with col_izq:
         # Para más de 3 variables, sugerimos un formato indexado x0, x1, x2...
         funcion_sug = " + ".join([f"x{i}**2" for i in range(num_vars)])
         
-    func_input = st.text_input("Función objetivo (en formato Python)", value=funcion_sug)
+    func_input = st.text_input("Función objetivo (Operadores matemáticos para la app: * -> Multiplicación, ** -> Exponente)", value=funcion_sug)
     
     # Generación dinámica de los puntos de partida según las variables elegidas
     st.subheader("📍 Punto inicial de partida")
@@ -217,7 +217,7 @@ with col_der:
                 st.pyplot(fig)
                 
             elif num_vars == 2:
-                st.subheader("🛸 Gráfico de Superficie 3D y Mínimo Encontrado")
+                st.subheader("Gráfico de Superficie 3D y Mínimo Encontrado")
                 fig = plt.figure(figsize=(10, 6))
                 ax = fig.add_subplot(111, projection='3d')
                 
