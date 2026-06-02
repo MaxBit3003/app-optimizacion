@@ -162,7 +162,7 @@ with col_izq:
     c2 = st.number_input("Parámetro c2 (Curvatura)", value=0.9, format="%.2f")
 
 with col_der:
-    st.header("📊 Resultados del Algoritmo")
+    st.header("📊 Resultados de la búsqueda")
     
     if st.button("🚀 Iniciar Cálculo", type="primary"):
         try:
