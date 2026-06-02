@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # Configuración de la página web
 st.set_page_config(page_title="App de Optimización", layout="wide")
 
-st.title("🧮 Aplicación de Métodos de Optimización presentado por "Los Industrialinas" ")
+st.title("🧮 Aplicación de Métodos de Optimización presentado por Los Industrialinas")
 st.markdown("### **Integrantes:** Catalina Olea, Maite Martínez y Maximiliano Ancán")
 st.markdown("Proyecto Final - Métodos de Optimización 2026")
 st.markdown("---")
