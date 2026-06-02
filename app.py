@@ -132,7 +132,7 @@ with col_izq:
     func_input = st.text_input("Función objetivo (en formato Python)", value=funcion_sug)
     
     # Generación dinámica de los puntos de partida según las variables elegidas
-    st.subheader("📍 Punto de partida")
+    st.subheader("📍 Punto inicial de partida")
     punto_partida = []
     
     if num_vars == 1:
@@ -164,7 +164,7 @@ with col_izq:
 with col_der:
     st.header("📊 Resultados de la búsqueda")
     
-    if st.button("🚀 Iniciar Cálculo", type="primary"):
+    if st.button(" 📝 Buscar la optimización", type="primary"):
         try:
             # Definir símbolos matemáticos dinámicamente según la cantidad elegida
             if num_vars == 1:
