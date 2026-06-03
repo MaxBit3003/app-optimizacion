@@ -1,10 +1,36 @@
 import streamlit as st
 import numpy as np
-import sympy as sp
+import sympy as sp 
 import matplotlib.pyplot as plt
 
 # Configuración de la página web
 st.set_page_config(page_title="App de Optimización", layout="wide")
+
+# --- ESTILO CSS PARA FONDO AZUL DEGRADADO ---
+st.markdown(
+    """
+    <style>
+    /* Cambia el fondo de la aplicación principal */
+    .stApp {
+        background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%);
+        color: #ffffff;
+    }
+    
+    /* Ajusta el color de los textos para que resalten en el fondo oscuro */
+    h1, h2, h3, p, span, label {
+        color: #ffffff !important;
+    }
+    
+    /* Estilo para las tarjetas de métricas */
+    div[data-testid="stMetricBackground"] {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px;
+        padding: 10px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.title("🧮 Aplicación de Métodos de Optimización presentado por Los Industrialinas")
 st.markdown("### **Integrantes:**")
@@ -125,13 +151,12 @@ with col_izq:
     
     # Sugerencias automáticas de funciones
     if num_vars == 1:
-        funcion_sug = "x**2 + 4*x + 4"
+        funcion_sug = "e**x - 4*x"
     elif num_vars == 2:
-        funcion_sug = "x**2 + y**2 - 2*x - 4*y"
+        funcion_sug = "x**2 + y**2 + e**(x+y)"
     elif num_vars == 3:
         funcion_sug = "x**2 + y**2 + z**2 - 2*x + 4*y - 6*z"
     else:
-        # Para más de 3 variables, se requiere de un formato indexado x0, x1, x2...
         funcion_sug = " + ".join([f"x{i}**2" for i in range(num_vars)])
         
     func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * ➱ Multiplicación, ** ➱ Exponente, sin() ➱ seno, cos() ➱ coseno, e ➱ Euler)", value=funcion_sug)
@@ -153,7 +178,6 @@ with col_izq:
         z0 = st.number_input("z0", value=4.0)
         punto_partida = [x0, y0, z0]
     else:
-        # Si eligen de 4 a 100 variables, hemos creado una lista dinámica de entradas
         for i in range(num_vars):
             val = st.number_input(f"Variable x{i}", value=2.0, key=f"var_{i}")
             punto_partida.append(val)
@@ -162,7 +186,7 @@ with col_izq:
     max_iter = st.number_input("Número máximo de iteraciones", value=100, step=10)
     tol = st.number_input("Tolerancia de convergencia", value=1e-5, format="%.5f")
     
-    st.subheader("➢ Condiciones de Wolfe")
+    st.subheader("➢ Conditions de Wolfe")
     c1 = st.number_input("1ra condición: Parámetro 𝜶  (Armijo)", value=1e-4, format="%.4f")
     c2 = st.number_input("2da condición: Parámetro σ (Curvatura)", value=0.9, format="%.2f")
 
@@ -181,7 +205,9 @@ with col_der:
             else:
                 vars_sym = [sp.Symbol(f'x{i}') for i in range(num_vars)]
                 
-            f_sym = sp.sympify(func_input)
+            # --- MAPEO DE LA VARIABLE E (EULER) ---
+            dict_euler = {"e": sp.E, "E": sp.E}
+            f_sym = sp.sympify(func_input, local_dict=dict_euler)
             
             # Ejecutar optimización numérica
             min_encontrado, historial, iters, error_f = optimizar(
@@ -240,7 +266,9 @@ with col_der:
                 # Camino e indicadores del mínimo en la superficie
                 z_historial = [evaluar_funcion(f_sym, vars_sym, p) for p in historial]
                 ax.plot(historial[:, 0], historial[:, 1], z_historial, 'r.-', label='Camino de convergencia', markersize=6)
-                ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='green', s=200, marker='*', label='Mínimo exacto', depthshade=False)
+                
+                # SE CAMBIÓ EL MARCADOR DE ESTRELLA '*' A CUADRADO 's' (SQUARE) VERDE
+                ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='green', s=150, marker='s', label='Mínimo exacto', depthshade=False)
                 
                 ax.set_xlabel('Eje X')
                 ax.set_ylabel('Eje Y')
@@ -250,7 +278,6 @@ with col_der:
                 st.pyplot(fig)
                 
             else:
-                # Alerta informativa para 3 o más variables (donde no se puede graficar el espacio físico completo)
                 st.info("ℹ️ El cálculo matemático se ha realizado con éxito. Recuerda que la visualización gráfica de funciones solo está disponible para modelos de 1 y 2 variables físicos.")
                 
         except Exception as e:
