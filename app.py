@@ -131,10 +131,10 @@ with col_izq:
     elif num_vars == 3:
         funcion_sug = "x**2 + y**2 + z**2 - 2*x + 4*y - 6*z"
     else:
-        # Para más de 3 variables, sugerimos un formato indexado x0, x1, x2...
+        # Para más de 3 variables, se requiere de un formato indexado x0, x1, x2...
         funcion_sug = " + ".join([f"x{i}**2" for i in range(num_vars)])
         
-    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * -> Multiplicación, ** -> Exponente, sin -> seno, cos -> coseno, e -> euler)", value=funcion_sug)
+    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * -> Multiplicación, ** -> Exponente, sin() -> seno, cos() -> coseno, e -> euler)", value=funcion_sug)
     
     # Generación dinámica de los puntos de partida según las variables elegidas
     st.subheader("📍 Punto inicial de partida")
@@ -153,7 +153,7 @@ with col_izq:
         z0 = st.number_input("z0", value=4.0)
         punto_partida = [x0, y0, z0]
     else:
-        # Si eligen de 4 a 100 variables, creamos una lista dinámica de entradas
+        # Si eligen de 4 a 100 variables, hemos creado una lista dinámica de entradas
         for i in range(num_vars):
             val = st.number_input(f"Variable x{i}", value=2.0, key=f"var_{i}")
             punto_partida.append(val)
@@ -163,8 +163,8 @@ with col_izq:
     tol = st.number_input("Tolerancia de convergencia", value=1e-5, format="%.5f")
     
     st.subheader("🔍 Condiciones de Wolfe")
-    c1 = st.number_input("Parámetro c1 (Armijo)", value=1e-4, format="%.4f")
-    c2 = st.number_input("Parámetro c2 (Curvatura)", value=0.9, format="%.2f")
+    c1 = st.number_input("Parámetro 𝜶  (Armijo)", value=1e-4, format="%.4f")
+    c2 = st.number_input("Parámetro \(\sigma \) (Curvatura)", value=0.9, format="%.2f")
 
 with col_der:
     st.header("📊 Resultados de la búsqueda")
@@ -192,14 +192,14 @@ with col_der:
             
             # Formatear el texto de salida del punto mínimo de forma limpia
             texto_coordenadas = " , ".join([f"{val:.4f}" for val in min_encontrado])
-            st.success(f"🎯 Punto mínimo encontrado en coordenadas: **({texto_coordenadas})**")
+            st.success(f"🎯 Punto mínimo encontrado ubicado en: **({texto_coordenadas})**")
             
             c_m1, c_m2, c_m3 = st.columns(3)
             c_m1.metric(label="Valor mínimo f(x*)", value=f"{valor_final_f:.5f}")
             c_m2.metric(label="Iteraciones realizadas", value=str(iters))
             c_m3.metric(label="Error final (||∇f||)", value=f"{error_f:.5e}")
             
-            # --- SECCIÓN DE GRÁFICOS REPARADA ---
+            # Gráficos
             historial = np.array(historial)
             
             if num_vars == 1:
@@ -222,7 +222,7 @@ with col_der:
                 st.pyplot(fig)
                 
             elif num_vars == 2:
-                st.subheader("Gráfico de Superficie 3D y Mínimo Encontrado")
+                st.subheader("Gráfico de Plano 3D y Mínimo Encontrado")
                 fig = plt.figure(figsize=(10, 6))
                 ax = fig.add_subplot(111, projection='3d')
                 
