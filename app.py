@@ -134,7 +134,7 @@ with col_izq:
         # Para más de 3 variables, sugerimos un formato indexado x0, x1, x2...
         funcion_sug = " + ".join([f"x{i}**2" for i in range(num_vars)])
         
-    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * -> Multiplicación, ** -> Exponente, sin -> seno, cos -> coseno, e -> euler", value=funcion_sug)
+    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * -> Multiplicación, ** -> Exponente, sin -> seno, cos -> coseno,   e -> euler", value=funcion_sug)
     
     # Generación dinámica de los puntos de partida según las variables elegidas
     st.subheader("📍 Punto inicial de partida")
