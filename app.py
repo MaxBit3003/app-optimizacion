@@ -11,7 +11,7 @@ st.markdown("### **Integrantes:**")
 st.markdown("Catalina Olea") 
 st.markdown("Maite Martínez")
 st.markdown("Maximiliano Ancán")
-st.markdown("Profesor: Gerardo Silva")
+st.markdown("### **Profesor**: Gerardo Silva")
 st.markdown("Proyecto Final - Métodos de Optimización 2026")
 st.markdown("---")
 
