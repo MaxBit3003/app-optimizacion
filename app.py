@@ -6,31 +6,33 @@ import matplotlib.pyplot as plt
 # Configuración de la página web
 st.set_page_config(page_title="App de Optimización", layout="wide")
 
-# --- ESTILO CSS PARA FONDO AZUL DEGRADADO MEJORADO ---
+# --- ESTILO CSS PARA FONDO AZUL DEGRADADO MÁS CLARO Y VIVO ---
 st.markdown(
     """
     <style>
-    /* Cambia el fondo de la aplicación principal */
+    /* Cambia el fondo de la aplicación a un degradado azul más claro y moderno */
     .stApp {
-        background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #3a506b 100%);
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
         color: #ffffff;
     }
     
-    /* Asegura que las etiquetas de los formularios y sliders sean blancas y legibles */
+    /* Asegura que las etiquetas de los formularios sean blancas y muy legibles */
     .stSlider label, .stSelectbox label, .stTextInput label, .stNumberInput label {
         color: #ffffff !important;
         font-weight: bold !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
     
-    /* Títulos y textos generales */
+    /* Títulos principales con sombra para resaltar */
     h1, h2, h3, p, span {
         color: #ffffff !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     }
     
     /* Estilo para las tarjetas de métricas */
     div[data-testid="stMetricBackground"] {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 10px;
         padding: 10px;
     }
@@ -152,23 +154,21 @@ col_izq, col_der = st.columns([1, 2])
 with col_izq:
     st.header("📋 Parámetros del Modelo")
     
-    # Control deslizante de 1 a 100 variables
     num_vars = st.slider("Número de variables", min_value=1, max_value=100, value=2)
     metodo = st.selectbox("Método de optimización", ["Método del Gradiente", "Gradiente Conjugado", "Método de Newton"])
     
-    # Sugerencias automáticas de funciones
+    # Sugerencias automáticas utilizando formato con comas decimales chilenas
     if num_vars == 1:
-        funcion_sug = "e**x - 4*x"
+        funcion_sug = "0,5*x**2 - 4*x"
     elif num_vars == 2:
-        funcion_sug = "x**2 + y**2 + e**(x+y)"
+        funcion_sug = "0,5*x**2 + 0,5*y**2 - 2*x - 4*y"
     elif num_vars == 3:
         funcion_sug = "x**2 + y**2 + z**2 - 2*x + 4*y - 6*z"
     else:
         funcion_sug = " + ".join([f"x{i}**2" for i in range(num_vars)])
         
-    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * ➱ Multiplicación, ** ➱ Exponente, sin() ➱ seno, cos() ➱ coseno, e ➱ Euler)", value=funcion_sug)
+    func_input = st.text_input("Función objetivo (Puedes usar comas para decimales, ej: 0,5*x**2)", value=funcion_sug)
     
-    # Generación dinámica de los puntos de partida según las variables elegidas
     st.subheader("📍 Punto inicial de partida")
     punto_partida = []
     
@@ -202,7 +202,6 @@ with col_der:
     
     if st.button(" 📝 Buscar la optimización", type="primary"):
         try:
-            # Definir símbolos matemáticos dinámicamente según la cantidad elegida
             if num_vars == 1:
                 vars_sym = [sp.Symbol('x')]
             elif num_vars == 2:
@@ -212,9 +211,13 @@ with col_der:
             else:
                 vars_sym = [sp.Symbol(f'x{i}') for i in range(num_vars)]
                 
-            # --- SOLUCIÓN ROBUSTA PARA EULER USANDO PARSE_EXPR ---
+            # --- TRADUCCIÓN DE COMAS DECIMALES A PUNTOS ---
+            # Reemplazamos la coma por punto para que Python procese decimales correctamente
+            func_procesada = func_input.replace(",", ".")
+            
+            # Mapeo de la variable e (Euler)
             dict_euler = {"e": sp.E, "E": sp.E}
-            f_sym = sp.parse_expr(func_input, local_dict=dict_euler)
+            f_sym = sp.parse_expr(func_procesada, local_dict=dict_euler)
             
             # Ejecutar optimización numérica
             min_encontrado, historial, iters, error_f = optimizar(
@@ -223,7 +226,6 @@ with col_der:
             
             valor_final_f = evaluar_funcion(f_sym, vars_sym, min_encontrado)
             
-            # Formatear el texto de salida del punto mínimo de forma limpia
             texto_coordenadas = " , ".join([f"{val:.4f}" for val in min_encontrado])
             st.success(f"🎯 Punto mínimo encontrado ubicado en: **({texto_coordenadas})**")
             
@@ -232,7 +234,6 @@ with col_der:
             c_m2.metric(label="Iteraciones realizadas", value=str(iters))
             c_m3.metric(label="Error final (||∇f||)", value=f"{error_f:.5e}")
             
-            # Gráficos
             historial = np.array(historial)
             
             if num_vars == 1:
@@ -268,13 +269,14 @@ with col_der:
                     for j_m in range(X.shape[1]):
                         Z[i_m, j_m] = evaluar_funcion(f_sym, vars_sym, [X[i_m, j_m], Y[i_m, j_m]])
                 
-                superficie = ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.6, edgecolor='none')
+                # --- NUEVA PALETA DE COLORES (COOLWARM_R): MÍNIMO AZUL, ALEJADO ROJO ---
+                superficie = ax.plot_surface(X, Y, Z, cmap='coolwarm_r', alpha=0.7, edgecolor='none')
                 
-                # Camino e indicadores del mínimo en la superficie
+                # Camino de optimización
                 z_historial = [evaluar_funcion(f_sym, vars_sym, p) for p in historial]
-                ax.plot(historial[:, 0], historial[:, 1], z_historial, 'r.-', label='Camino de convergencia', markersize=6)
+                ax.plot(historial[:, 0], historial[:, 1], z_historial, 'k.-', label='Camino de convergencia', markersize=6)
                 
-                # MARCADOR CONFIGURADO COMO CUADRADO 's' (SQUARE) VERDE
+                # Cuadrado verde para el mínimo
                 ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='green', s=150, marker='s', label='Mínimo exacto', depthshade=False)
                 
                 ax.set_xlabel('Eje X')
