@@ -163,8 +163,8 @@ with col_izq:
     tol = st.number_input("Tolerancia de convergencia", value=1e-5, format="%.5f")
     
     st.subheader("🔍 Condiciones de Wolfe")
-    c1 = st.number_input("Parámetro 𝜶  (Armijo)", value=1e-4, format="%.4f")
-    c2 = st.number_input("Parámetro \(\sigma \) (Curvatura)", value=0.9, format="%.2f")
+    c1 = st.number_input("1ra condición: Parámetro 𝜶  (Armijo)", value=1e-4, format="%.4f")
+    c2 = st.number_input("2da condición: Parámetro σ (Curvatura)", value=0.9, format="%.2f")
 
 with col_der:
     st.header("📊 Resultados de la búsqueda")
