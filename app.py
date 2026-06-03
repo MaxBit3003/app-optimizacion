@@ -134,7 +134,7 @@ with col_izq:
         # Para más de 3 variables, se requiere de un formato indexado x0, x1, x2...
         funcion_sug = " + ".join([f"x{i}**2" for i in range(num_vars)])
         
-    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * -> Multiplicación, ** -> Exponente, sin() -> seno, cos() -> coseno, e -> euler)", value=funcion_sug)
+    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * ➱ Multiplicación, ** ➱ Exponente, sin() ➱ seno, cos() ➱ coseno, e ➱ Euler)", value=funcion_sug)
     
     # Generación dinámica de los puntos de partida según las variables elegidas
     st.subheader("📍 Punto inicial de partida")
@@ -158,11 +158,11 @@ with col_izq:
             val = st.number_input(f"Variable x{i}", value=2.0, key=f"var_{i}")
             punto_partida.append(val)
         
-    st.subheader("⚙️ Parámetros de Control")
+    st.subheader("➢ Parámetros de Control")
     max_iter = st.number_input("Número máximo de iteraciones", value=100, step=10)
     tol = st.number_input("Tolerancia de convergencia", value=1e-5, format="%.5f")
     
-    st.subheader("🔍 Condiciones de Wolfe")
+    st.subheader("➢ Condiciones de Wolfe")
     c1 = st.number_input("1ra condición: Parámetro 𝜶  (Armijo)", value=1e-4, format="%.4f")
     c2 = st.number_input("2da condición: Parámetro σ (Curvatura)", value=0.9, format="%.2f")
 
