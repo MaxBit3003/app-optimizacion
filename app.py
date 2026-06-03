@@ -240,7 +240,7 @@ with col_der:
                 # Camino e indicadores del mínimo en la superficie
                 z_historial = [evaluar_funcion(f_sym, vars_sym, p) for p in historial]
                 ax.plot(historial[:, 0], historial[:, 1], z_historial, 'r.-', label='Camino de convergencia', markersize=6)
-                ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='rose', s=200, marker='*', label='Mínimo exacto', depthshade=False)
+                ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='green', s=200, marker='*', label='Mínimo exacto', depthshade=False)
                 
                 ax.set_xlabel('Eje X')
                 ax.set_ylabel('Eje Y')
