@@ -155,7 +155,7 @@ with col_izq:
     st.header("📋 Parámetros del Modelo")
     
     num_vars = st.slider("Número de variables", min_value=1, max_value=100, value=2)
-    metodo = st.selectbox("Método de optimización", ["Método del Gradiente", "Gradiente Conjugado", "Método de Newton"])
+    metodo = st.selectbox("Método de optimización a elegir", ["Método del Gradiente", "Gradiente Conjugado", "Método de Newton"])
     
     # Sugerencias automáticas utilizando formato con comas decimales chilenas
     if num_vars == 1:
