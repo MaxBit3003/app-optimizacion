@@ -7,7 +7,11 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="App de Optimización", layout="wide")
 
 st.title("🧮 Aplicación de Métodos de Optimización presentado por Los Industrialinas")
-st.markdown("### **Integrantes:** Catalina Olea, Maite Martínez y Maximiliano Ancán")
+st.markdown("### **Integrantes:**)
+st.markdown("Catalina Olea") 
+st.markdown("Maite Martínez)
+st.markdown("Maximiliano Ancán")
+st.markdown("Profesor: Gerardo Silva")
 st.markdown("Proyecto Final - Métodos de Optimización 2026")
 st.markdown("---")
 
@@ -235,7 +239,7 @@ with col_der:
                 # Camino e indicadores del mínimo en la superficie
                 z_historial = [evaluar_funcion(f_sym, vars_sym, p) for p in historial]
                 ax.plot(historial[:, 0], historial[:, 1], z_historial, 'r.-', label='Camino de convergencia', markersize=6)
-                ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='red', s=200, marker='*', label='Mínimo exacto', depthshade=False)
+                ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='rose', s=200, marker='*', label='Mínimo exacto', depthshade=False)
                 
                 ax.set_xlabel('Eje X')
                 ax.set_ylabel('Eje Y')
@@ -246,7 +250,7 @@ with col_der:
                 
             else:
                 # Alerta informativa para 3 o más variables (donde no se puede graficar el espacio físico completo)
-                st.info("ℹ️ El cálculo matemático se realizó con éxito. Recuerda que la visualización gráfica de funciones solo está disponible para modelos de 1 y 2 variables físicos.")
+                st.info("ℹ️ El cálculo matemático se ha realizado con éxito. Recuerda que la visualización gráfica de funciones solo está disponible para modelos de 1 y 2 variables físicos.")
                 
         except Exception as e:
             st.error(f"⚠️ Error al interpretar la función matemática o en los parámetros: {e}")
