@@ -6,24 +6,31 @@ import matplotlib.pyplot as plt
 # Configuración de la página web
 st.set_page_config(page_title="App de Optimización", layout="wide")
 
-# --- ESTILO CSS PARA FONDO AZUL DEGRADADO ---
+# --- ESTILO CSS PARA FONDO AZUL DEGRADADO MEJORADO ---
 st.markdown(
     """
     <style>
     /* Cambia el fondo de la aplicación principal */
     .stApp {
-        background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%);
+        background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #3a506b 100%);
         color: #ffffff;
     }
     
-    /* Ajusta el color de los textos para que resalten en el fondo oscuro */
-    h1, h2, h3, p, span, label {
+    /* Asegura que las etiquetas de los formularios y sliders sean blancas y legibles */
+    .stSlider label, .stSelectbox label, .stTextInput label, .stNumberInput label {
+        color: #ffffff !important;
+        font-weight: bold !important;
+    }
+    
+    /* Títulos y textos generales */
+    h1, h2, h3, p, span {
         color: #ffffff !important;
     }
     
     /* Estilo para las tarjetas de métricas */
     div[data-testid="stMetricBackground"] {
         background-color: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 10px;
         padding: 10px;
     }
@@ -186,7 +193,7 @@ with col_izq:
     max_iter = st.number_input("Número máximo de iteraciones", value=100, step=10)
     tol = st.number_input("Tolerancia de convergencia", value=1e-5, format="%.5f")
     
-    st.subheader("➢ Conditions de Wolfe")
+    st.subheader("➢ Condiciones de Wolfe")
     c1 = st.number_input("1ra condición: Parámetro 𝜶  (Armijo)", value=1e-4, format="%.4f")
     c2 = st.number_input("2da condición: Parámetro σ (Curvatura)", value=0.9, format="%.2f")
 
@@ -205,9 +212,9 @@ with col_der:
             else:
                 vars_sym = [sp.Symbol(f'x{i}') for i in range(num_vars)]
                 
-            # --- MAPEO DE LA VARIABLE E (EULER) ---
+            # --- SOLUCIÓN ROBUSTA PARA EULER USANDO PARSE_EXPR ---
             dict_euler = {"e": sp.E, "E": sp.E}
-            f_sym = sp.sympify(func_input, local_dict=dict_euler)
+            f_sym = sp.parse_expr(func_input, local_dict=dict_euler)
             
             # Ejecutar optimización numérica
             min_encontrado, historial, iters, error_f = optimizar(
@@ -267,7 +274,7 @@ with col_der:
                 z_historial = [evaluar_funcion(f_sym, vars_sym, p) for p in historial]
                 ax.plot(historial[:, 0], historial[:, 1], z_historial, 'r.-', label='Camino de convergencia', markersize=6)
                 
-                # SE CAMBIÓ EL MARCADOR DE ESTRELLA '*' A CUADRADO 's' (SQUARE) VERDE
+                # MARCADOR CONFIGURADO COMO CUADRADO 's' (SQUARE) VERDE
                 ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='green', s=150, marker='s', label='Mínimo exacto', depthshade=False)
                 
                 ax.set_xlabel('Eje X')
