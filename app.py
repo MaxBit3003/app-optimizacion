@@ -107,6 +107,7 @@ def busqueda_linea_wolfe(f, grad_f, f_sym, vars_sym, x_k, d_k, c1, c2):
 def optimizar(metodo, f_sym, vars_sym, x0, max_iter, tol, c1, c2):
     """Ejecuta el método de optimización seleccionado."""
     historial_puntos = [np.array(x0, dtype=float)]
+    historial_errores = []  # <--- NUEVA LISTA PARA GUARDAR EL ERROR PASO A PASO
     x_k = np.array(x0, dtype=float)
     
     d_ant = None
@@ -115,6 +116,7 @@ def optimizar(metodo, f_sym, vars_sym, x0, max_iter, tol, c1, c2):
     for i in range(max_iter):
         g_k = calcular_gradiente(f_sym, vars_sym, x_k)
         norma_g = np.linalg.norm(g_k)
+        historial_errores.append(norma_g)  # Guardamos el criterio de parada alcanzado
         
         if norma_g < tol:
             break
@@ -145,7 +147,7 @@ def optimizar(metodo, f_sym, vars_sym, x0, max_iter, tol, c1, c2):
         x_k = x_k + alpha * d_k
         historial_puntos.append(x_k.copy())
         
-    return x_k, historial_puntos, i + 1, norma_g
+    return x_k, historial_puntos, historial_errores, i + 1, norma_g
 
 # Interfaz para el usuario
 
@@ -212,15 +214,14 @@ with col_der:
                 vars_sym = [sp.Symbol(f'x{i}') for i in range(num_vars)]
                 
             # --- TRADUCCIÓN DE COMAS DECIMALES A PUNTOS ---
-            # Reemplazamos la coma por punto para que Python procese decimales correctamente
             func_procesada = func_input.replace(",", ".")
             
             # Mapeo de la variable e (Euler)
             dict_euler = {"e": sp.E, "E": sp.E}
             f_sym = sp.parse_expr(func_procesada, local_dict=dict_euler)
             
-            # Ejecutar optimización numérica
-            min_encontrado, historial, iters, error_f = optimizar(
+            # Ejecutar optimización numérica (Capturando la lista de errores)
+            min_encontrado, historial, historial_errores, iters, error_f = optimizar(
                 metodo, f_sym, vars_sym, punto_partida, max_iter, tol, c1, c2
             )
             
@@ -236,58 +237,78 @@ with col_der:
             
             historial = np.array(historial)
             
-            if num_vars == 1:
-                st.subheader("📈 Gráfico de Convergencia 2D")
-                fig, ax = plt.subplots(figsize=(8, 4))
+            # --- ORGANIZACIÓN DE GRÁFICOS EN PESTAÑAS (TABS) ---
+            tab1, tab2 = st.tabs(["🗺️ Gráfico del Modelo", "📉 Gráfico de Convergencia"])
+            
+            with tab1:
+                if num_vars == 1:
+                    st.subheader("📈 Gráfico de Convergencia 2D")
+                    fig, ax = plt.subplots(figsize=(8, 4))
+                    
+                    x_min, x_max = historial[:, 0].min() - 2, historial[:, 0].max() + 2
+                    X_vals = np.linspace(x_min, x_max, 200)
+                    Y_vals = [evaluar_funcion(f_sym, vars_sym, [val]) for val in X_vals]
+                    
+                    ax.plot(X_vals, Y_vals, 'b-', label='f(x)')
+                    Y_hist = [evaluar_funcion(f_sym, vars_sym, [val]) for val in historial[:, 0]]
+                    ax.plot(historial[:, 0], Y_hist, 'r.-', label='Trayectoria del algoritmo')
+                    ax.plot(min_encontrado[0], valor_final_f, 'go', label=f'Mínimo: {min_encontrado[0]:.2f}')
+                    
+                    ax.set_xlabel('Variable X')
+                    ax.set_ylabel('f(x)')
+                    ax.legend()
+                    ax.grid(True)
+                    st.pyplot(fig)
+                    
+                elif num_vars == 2:
+                    st.subheader("Gráfico de Plano 3D y Mínimo Encontrado")
+                    fig = plt.figure(figsize=(10, 6))
+                    ax = fig.add_subplot(111, projection='3d')
+                    
+                    x_min, x_max = min(historial[:, 0].min() - 1, punto_partida[0] - 1), max(historial[:, 0].max() + 1, punto_partida[0] + 1)
+                    y_min, y_max = min(historial[:, 1].min() - 1, punto_partida[1] - 1), max(historial[:, 1].max() + 1, punto_partida[1] + 1)
+                    
+                    X, Y = np.meshgrid(np.linspace(x_min, x_max, 40), np.linspace(y_min, y_max, 40))
+                    Z = np.zeros_like(X)
+                    for i_m in range(X.shape[0]):
+                        for j_m in range(X.shape[1]):
+                            Z[i_m, j_m] = evaluar_funcion(f_sym, vars_sym, [X[i_m, j_m], Y[i_m, j_m]])
+                    
+                    # --- NUEVA PALETA DE COLORES (COOLWARM_R): MÍNIMO AZUL, ALEJADO ROJO ---
+                    superficie = ax.plot_surface(X, Y, Z, cmap='coolwarm_r', alpha=0.7, edgecolor='none')
+                    
+                    # Camino de optimización
+                    z_historial = [evaluar_funcion(f_sym, vars_sym, p) for p in historial]
+                    ax.plot(historial[:, 0], historial[:, 1], z_historial, 'k.-', label='Camino de convergencia', markersize=6)
+                    
+                    # Cuadrado verde para el mínimo
+                    ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='green', s=150, marker='s', label='Mínimo exacto', depthshade=False)
+                    
+                    ax.set_xlabel('Eje X')
+                    ax.set_ylabel('Eje Y')
+                    ax.set_zlabel('f(X, Y)')
+                    ax.legend()
+                    fig.colorbar(superficie, ax=ax, shrink=0.5, aspect=5)
+                    st.pyplot(fig)
+                    
+                else:
+                    st.info("ℹ️ El cálculo matemático se ha realizado con éxito. Recuerda que la visualización gráfica de funciones solo está disponible para modelos de 1 y 2 variables físicos.")
+            
+            with tab2:
+                # --- AQUÍ SE INYECTA EL GRÁFICO EXIGIDO POR EL PROFESOR ---
+                st.subheader("📉 Criterio de Parada: Error versus Número de Iteraciones")
+                fig_conv, ax_conv = plt.subplots(figsize=(8, 4))
                 
-                x_min, x_max = historial[:, 0].min() - 2, historial[:, 0].max() + 2
-                X_vals = np.linspace(x_min, x_max, 200)
-                Y_vals = [evaluar_funcion(f_sym, vars_sym, [val]) for val in X_vals]
+                # Graficamos la norma del gradiente en cada iteración
+                ax_conv.plot(range(len(historial_errores)), historial_errores, 'g-s', linewidth=2, label='||∇f(x_k)|| (Magnitud del Error)', markersize=4)
                 
-                ax.plot(X_vals, Y_vals, 'b-', label='f(x)')
-                Y_hist = [evaluar_funcion(f_sym, vars_sym, [val]) for val in historial[:, 0]]
-                ax.plot(historial[:, 0], Y_hist, 'r.-', label='Trayectoria del algoritmo')
-                ax.plot(min_encontrado[0], valor_final_f, 'go', label=f'Mínimo: {min_encontrado[0]:.2f}')
+                ax_conv.set_xlabel('Número de Iteraciones (k)')
+                ax_conv.set_ylabel('Error final o criterio de parada alcanzado')
+                ax_conv.set_yscale('log')  # Escala logarítmica, ideal para ver la convergencia hacia cero
+                ax_conv.grid(True, which="both", linestyle="--", alpha=0.5)
+                ax_conv.legend()
                 
-                ax.set_xlabel('Variable X')
-                ax.set_ylabel('f(x)')
-                ax.legend()
-                ax.grid(True)
-                st.pyplot(fig)
-                
-            elif num_vars == 2:
-                st.subheader("Gráfico de Plano 3D y Mínimo Encontrado")
-                fig = plt.figure(figsize=(10, 6))
-                ax = fig.add_subplot(111, projection='3d')
-                
-                x_min, x_max = min(historial[:, 0].min() - 1, punto_partida[0] - 1), max(historial[:, 0].max() + 1, punto_partida[0] + 1)
-                y_min, y_max = min(historial[:, 1].min() - 1, punto_partida[1] - 1), max(historial[:, 1].max() + 1, punto_partida[1] + 1)
-                
-                X, Y = np.meshgrid(np.linspace(x_min, x_max, 40), np.linspace(y_min, y_max, 40))
-                Z = np.zeros_like(X)
-                for i_m in range(X.shape[0]):
-                    for j_m in range(X.shape[1]):
-                        Z[i_m, j_m] = evaluar_funcion(f_sym, vars_sym, [X[i_m, j_m], Y[i_m, j_m]])
-                
-                # --- NUEVA PALETA DE COLORES (COOLWARM_R): MÍNIMO AZUL, ALEJADO ROJO ---
-                superficie = ax.plot_surface(X, Y, Z, cmap='coolwarm_r', alpha=0.7, edgecolor='none')
-                
-                # Camino de optimización
-                z_historial = [evaluar_funcion(f_sym, vars_sym, p) for p in historial]
-                ax.plot(historial[:, 0], historial[:, 1], z_historial, 'k.-', label='Camino de convergencia', markersize=6)
-                
-                # Cuadrado verde para el mínimo
-                ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='green', s=150, marker='s', label='Mínimo exacto', depthshade=False)
-                
-                ax.set_xlabel('Eje X')
-                ax.set_ylabel('Eje Y')
-                ax.set_zlabel('f(X, Y)')
-                ax.legend()
-                fig.colorbar(superficie, ax=ax, shrink=0.5, aspect=5)
-                st.pyplot(fig)
-                
-            else:
-                st.info("ℹ️ El cálculo matemático se ha realizado con éxito. Recuerda que la visualización gráfica de funciones solo está disponible para modelos de 1 y 2 variables físicos.")
+                st.pyplot(fig_conv)
                 
         except Exception as e:
             st.error(f"⚠️ Error al interpretar la función matemática o en los parámetros: {e}")
