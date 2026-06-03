@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="App de Optimización", layout="wide")
 
 st.title("🧮 Aplicación de Métodos de Optimización presentado por Los Industrialinas")
-st.markdown("### **Integrantes:**)
+st.markdown("### **Integrantes:**")
 st.markdown("Catalina Olea") 
 st.markdown("Maite Martínez)
 st.markdown("Maximiliano Ancán")
