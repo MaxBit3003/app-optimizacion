@@ -10,13 +10,13 @@ st.title("🧮 Aplicación de Métodos de Optimización presentado por Los Indus
 st.markdown("### **Integrantes:**")
 st.markdown("-> Catalina Olea") 
 st.markdown("-> Maite Martínez")
-st.markdown("-> Maximiliano Ancán")
+st.markdown("-> Maximiliano Ancán") 
 st.markdown("### **Profesor**:")
 st.markdown("-> Gerardo Silva")
 st.markdown("Proyecto Final - Métodos de Optimización 2026")
 st.markdown("---")
 
-# --- MOTOR MATEMÁTICO DE OPTIMIZACIÓN ---
+# Crear funciones para el modelo matemático de optimización
 
 def evaluar_funcion(func_sympy, variables, punto):
     """Evalúa la función en un punto específico."""
@@ -112,7 +112,7 @@ def optimizar(metodo, f_sym, vars_sym, x0, max_iter, tol, c1, c2):
         
     return x_k, historial_puntos, i + 1, norma_g
 
-# --- INTERFAZ DE USUARIO ---
+# Interfaz para el usuario
 
 col_izq, col_der = st.columns([1, 2])
 
@@ -134,7 +134,7 @@ with col_izq:
         # Para más de 3 variables, sugerimos un formato indexado x0, x1, x2...
         funcion_sug = " + ".join([f"x{i}**2" for i in range(num_vars)])
         
-    func_input = st.text_input("Función objetivo (Operadores matemáticos para la app: * -> Multiplicación, ** -> Exponente)", value=funcion_sug)
+    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la sitio web: * -> Multiplicación, ** -> Exponente), sin() -> seno, cos() -> coseno", value=funcion_sug)
     
     # Generación dinámica de los puntos de partida según las variables elegidas
     st.subheader("📍 Punto inicial de partida")
