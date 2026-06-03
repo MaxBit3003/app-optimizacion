@@ -167,7 +167,7 @@ with col_izq:
     else:
         funcion_sug = " + ".join([f"x{i}**2" for i in range(num_vars)])
         
-    func_input = st.text_input("Función objetivo (Puedes usar comas para decimales, ej: 0,5*x**2)", value=funcion_sug)
+    func_input = st.text_input("Función objetivo (Operadores matemáticos disponibles para la app: * ➱ Multiplicación, ** ➱ Exponente, sin() ➱ seno, cos() ➱ coseno, e ➱ Euler, puedes usar comas para decimales, ej: 0,5*x**2)", value=funcion_sug)
     
     st.subheader("📍 Punto inicial de partida")
     punto_partida = []
