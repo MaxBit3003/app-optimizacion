@@ -202,7 +202,7 @@ with col_izq:
 with col_der:
     st.header("📊 Resultados de la búsqueda")
     
-    if st.button(" 📝 Buscar la optimización", type="primary"):
+    if st.button(" 📝 Buscar el óptimo", type="primary"):
         try:
             if num_vars == 1:
                 vars_sym = [sp.Symbol('x')]
