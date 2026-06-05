@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import sympy as sp 
 import matplotlib.pyplot as plt
+import pandas as pd
+import plotly.graph_objects as go
 
 # Configuración de la página web
 st.set_page_config(page_title="App de Optimización", layout="wide")
@@ -107,7 +109,7 @@ def busqueda_linea_wolfe(f, grad_f, f_sym, vars_sym, x_k, d_k, c1, c2):
 def optimizar(metodo, f_sym, vars_sym, x0, max_iter, tol, c1, c2):
     """Ejecuta el método de optimización seleccionado."""
     historial_puntos = [np.array(x0, dtype=float)]
-    historial_errores = []  # <--- NUEVA LISTA PARA GUARDAR EL ERROR PASO A PASO
+    historial_errores = []  
     x_k = np.array(x0, dtype=float)
     
     d_ant = None
@@ -116,7 +118,7 @@ def optimizar(metodo, f_sym, vars_sym, x0, max_iter, tol, c1, c2):
     for i in range(max_iter):
         g_k = calcular_gradiente(f_sym, vars_sym, x_k)
         norma_g = np.linalg.norm(g_k)
-        historial_errores.append(norma_g)  # Guardamos el criterio de parada alcanzado
+        historial_errores.append(norma_g)  
         
         if norma_g < tol:
             break
@@ -202,7 +204,7 @@ with col_izq:
 with col_der:
     st.header("📊 Resultados de la búsqueda")
     
-    if st.button(" 📝 Buscar el óptimo", type="primary"):
+    if st.button(" 📝 Buscar la optimización", type="primary"):
         try:
             if num_vars == 1:
                 vars_sym = [sp.Symbol('x')]
@@ -220,7 +222,7 @@ with col_der:
             dict_euler = {"e": sp.E, "E": sp.E}
             f_sym = sp.parse_expr(func_procesada, local_dict=dict_euler)
             
-            # Ejecutar optimización numérica (Capturando la lista de errores)
+            # Ejecutar optimización numérica
             min_encontrado, historial, historial_errores, iters, error_f = optimizar(
                 metodo, f_sym, vars_sym, punto_partida, max_iter, tol, c1, c2
             )
@@ -238,7 +240,7 @@ with col_der:
             historial = np.array(historial)
             
             # --- ORGANIZACIÓN DE GRÁFICOS EN PESTAÑAS (TABS) ---
-            tab1, tab2 = st.tabs(["🗺️ Gráfico del Modelo", "📉 Gráfico de Convergencia"])
+            tab1, tab2, tab3 = st.tabs(["🗺️ Gráfico del Modelo", "📉 Gráfico de Convergencia", "📋 Tabla de Iteraciones"])
             
             with tab1:
                 if num_vars == 1:
@@ -261,54 +263,107 @@ with col_der:
                     st.pyplot(fig)
                     
                 elif num_vars == 2:
-                    st.subheader("Gráfico de Plano 3D y Mínimo Encontrado")
-                    fig = plt.figure(figsize=(10, 6))
-                    ax = fig.add_subplot(111, projection='3d')
+                    st.subheader("🛸 Espacio Geométrico 3D Interactivo (Arrastra y mueve con el mouse)")
                     
-                    x_min, x_max = min(historial[:, 0].min() - 1, punto_partida[0] - 1), max(historial[:, 0].max() + 1, punto_partida[0] + 1)
-                    y_min, y_max = min(historial[:, 1].min() - 1, punto_partida[1] - 1), max(historial[:, 1].max() + 1, punto_partida[1] + 1)
+                    x_min, x_max = min(historial[:, 0].min() - 2, punto_partida[0] - 2), max(historial[:, 0].max() + 2, punto_partida[0] + 2)
+                    y_min, y_max = min(historial[:, 1].min() - 2, punto_partida[1] - 2), max(historial[:, 1].max() + 2, punto_partida[1] + 2)
                     
-                    X, Y = np.meshgrid(np.linspace(x_min, x_max, 40), np.linspace(y_min, y_max, 40))
+                    x_malla = np.linspace(x_min, x_max, 50)
+                    y_malla = np.linspace(y_min, y_max, 50)
+                    X, Y = np.meshgrid(x_malla, y_malla)
+                    
                     Z = np.zeros_like(X)
                     for i_m in range(X.shape[0]):
                         for j_m in range(X.shape[1]):
                             Z[i_m, j_m] = evaluar_funcion(f_sym, vars_sym, [X[i_m, j_m], Y[i_m, j_m]])
                     
-                    # --- NUEVA PALETA DE COLORES (COOLWARM_R): MÍNIMO AZUL, ALEJADO ROJO ---
-                    superficie = ax.plot_surface(X, Y, Z, cmap='coolwarm_r', alpha=0.7, edgecolor='none')
+                    # Generación del objeto gráfico interactivo con Plotly
+                    fig_plotly = go.Figure()
                     
-                    # Camino de optimización
+                    # 1. Añadir la superficie matemática
+                    fig_plotly.add_trace(go.Surface(
+                        x=x_malla, y=y_malla, z=Z,
+                        colorscale='Coolwarm',
+                        reversescale=True,
+                        opacity=0.8,
+                        colorbar=dict(title="f(x, y)", thickness=15)
+                    ))
+                    
+                    # 2. Añadir la trayectoria recorrida por el algoritmo
                     z_historial = [evaluar_funcion(f_sym, vars_sym, p) for p in historial]
-                    ax.plot(historial[:, 0], historial[:, 1], z_historial, 'k.-', label='Camino de convergencia', markersize=6)
+                    fig_plotly.add_trace(go.Scatter3d(
+                        x=historial[:, 0], y=historial[:, 1], z=z_historial,
+                        mode='lines+markers',
+                        line=dict(color='black', width=5),
+                        marker=dict(color='red', size=4),
+                        name='Camino de convergencia'
+                    ))
                     
-                    # Cuadrado verde para el mínimo
-                    ax.scatter(min_encontrado[0], min_encontrado[1], valor_final_f, color='green', s=150, marker='s', label='Mínimo exacto', depthshade=False)
+                    # 3. Añadir el punto mínimo como un cubo verde (Marcador cuadrado flotante)
+                    fig_plotly.add_trace(go.Scatter3d(
+                        x=[min_encontrado[0]], y=[min_encontrado[1]], z=[valor_final_f],
+                        mode='markers',
+                        marker=dict(color='green', size=10, symbol='square'),
+                        name='Mínimo exacto encontrado'
+                    ))
                     
-                    ax.set_xlabel('Eje X')
-                    ax.set_ylabel('Eje Y')
-                    ax.set_zlabel('f(X, Y)')
-                    ax.legend()
-                    fig.colorbar(superficie, ax=ax, shrink=0.5, aspect=5)
-                    st.pyplot(fig)
+                    # Configuración de etiquetas de los ejes del espacio 3D rotable
+                    fig_plotly.update_layout(
+                        scene=dict(
+                            xaxis_title='Eje X',
+                            yaxis_title='Eje Y',
+                            zaxis_title='Función f(X, Y)'
+                        ),
+                        margin=dict(l=0, r=0, b=0, t=40),
+                        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01)
+                    )
+                    
+                    st.plotly_chart(fig_plotly, use_container_width=True)
                     
                 else:
                     st.info("ℹ️ El cálculo matemático se ha realizado con éxito. Recuerda que la visualización gráfica de funciones solo está disponible para modelos de 1 y 2 variables físicos.")
             
             with tab2:
-                # --- AQUÍ SE INYECTA EL GRÁFICO EXIGIDO POR EL PROFESOR ---
                 st.subheader("📉 Criterio de Parada: Error versus Número de Iteraciones")
                 fig_conv, ax_conv = plt.subplots(figsize=(8, 4))
                 
-                # Graficamos la norma del gradiente en cada iteración
                 ax_conv.plot(range(len(historial_errores)), historial_errores, 'g-s', linewidth=2, label='||∇f(x_k)|| (Magnitud del Error)', markersize=4)
-                
                 ax_conv.set_xlabel('Número de Iteraciones (k)')
                 ax_conv.set_ylabel('Error final o criterio de parada alcanzado')
-                ax_conv.set_yscale('log')  # Escala logarítmica, ideal para ver la convergencia hacia cero
+                ax_conv.set_yscale('log')
                 ax_conv.grid(True, which="both", linestyle="--", alpha=0.5)
                 ax_conv.legend()
-                
                 st.pyplot(fig_conv)
+                
+            with tab3:
+                # --- NUEVA SECCIÓN: CONSTRUCCIÓN DINÁMICA DE LA TABLA DE ITERACIONES ---
+                st.subheader("📋 Registro Histórico de Convergencia Paso a Paso")
+                
+                filas_tabla = []
+                for k, p in enumerate(historial):
+                    val_f_k = evaluar_funcion(f_sym, vars_sym, p)
+                    
+                    # Estructura base requerida por la pauta
+                    registro = {
+                        "Iteración": k,
+                        "f(x*)": round(val_f_k, 5)
+                    }
+                    
+                    # Añadir dinámicamente las columnas de los valores correspondientes
+                    if num_vars == 1:
+                        registro["Valor x"] = round(p[0], 5)
+                    elif num_vars == 2:
+                        registro["Valor x"] = round(p[0], 5)
+                        registro["Valor y"] = round(p[1], 5)
+                    else:
+                        for idx_v in range(num_vars):
+                            registro[f"Valor x{idx_v}"] = round(p[idx_v], 5)
+                            
+                    filas_tabla.append(registro)
+                
+                # Transformar a formato DataFrame de Pandas y renderizar en la interfaz
+                df_iteraciones = pd.DataFrame(filas_tabla)
+                st.dataframe(df_iteraciones, use_container_width=True)
                 
         except Exception as e:
             st.error(f"⚠️ Error al interpretar la función matemática o en los parámetros: {e}")
