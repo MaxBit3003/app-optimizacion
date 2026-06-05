@@ -204,7 +204,7 @@ with col_izq:
 with col_der:
     st.header("📊 Resultados de la búsqueda")
     
-    if st.button(" 📝 Buscar la optimización", type="primary"):
+    if st.button(" 📝 Buscar el óptimo", type="primary"):
         try:
             if num_vars == 1:
                 vars_sym = [sp.Symbol('x')]
@@ -283,7 +283,7 @@ with col_der:
                     # 1. Añadir la superficie matemática
                     fig_plotly.add_trace(go.Surface(
                         x=x_malla, y=y_malla, z=Z,
-                        colorscale='Coolwarm',
+                        colorscale='coolwarm',
                         reversescale=True,
                         opacity=0.8,
                         colorbar=dict(title="f(x, y)", thickness=15)
