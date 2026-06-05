@@ -337,7 +337,7 @@ with col_der:
                 
             with tab3:
                 # --- NUEVA SECCIÓN: CONSTRUCCIÓN DINÁMICA DE LA TABLA DE ITERACIONES ---
-                st.subheader("📋 Registro Histórico de Convergencia Paso a Paso")
+                st.subheader("📋 Registro de datos obtenidos en la convergencia")
                 
                 filas_tabla = []
                 for k, p in enumerate(historial):
