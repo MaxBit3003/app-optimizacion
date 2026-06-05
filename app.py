@@ -283,7 +283,7 @@ with col_der:
                     # 1. Añadir la superficie matemática
                     fig_plotly.add_trace(go.Surface(
                         x=x_malla, y=y_malla, z=Z,
-                        colorscale='coolwarm',
+                        colorscale='bluered',
                         reversescale=True,
                         opacity=0.8,
                         colorbar=dict(title="f(x, y)", thickness=15)
