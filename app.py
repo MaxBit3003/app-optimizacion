@@ -263,7 +263,7 @@ with col_der:
                     st.pyplot(fig)
                     
                 elif num_vars == 2:
-                    st.subheader("🛸 Espacio Geométrico 3D Interactivo (Arrastra y mueve con el mouse)")
+                    st.subheader("Espacio Geométrico 3D Interactivo (Disponible para mover con el mouse)")
                     
                     x_min, x_max = min(historial[:, 0].min() - 2, punto_partida[0] - 2), max(historial[:, 0].max() + 2, punto_partida[0] + 2)
                     y_min, y_max = min(historial[:, 1].min() - 2, punto_partida[1] - 2), max(historial[:, 1].max() + 2, punto_partida[1] + 2)
